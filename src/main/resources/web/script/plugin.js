@@ -1,75 +1,5 @@
 dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
-    var BOX_COLOR = "rgb(255, 207, 103)"
-    var LABEL_COLOR = "black"
-
-    function BoxCustomizer(canvas_topics, canvas_assocs) {
-
-        this.create_topic = function(topic_viewmodel, ctx) {
-            return new TopicView(topic_viewmodel, ctx)
-        }
-
-        this.draw_topic = function(ct, ctx) {
-            var x = ct.x - ct.width / 2
-            var y = ct.y - ct.height / 2
-            // box
-            ctx.fillStyle = BOX_COLOR
-            ctx.fillRect(x, y, ct.width, ct.height)
-            // label
-            var line_height = ct.label_wrapper.get_line_height()
-            ctx.fillStyle = LABEL_COLOR
-            ct.label_wrapper.draw(x, y + line_height - 4, ctx)
-        }
-
-        /**
-         * Properties:
-         *  id
-         *  x, y                    Topic position. Represents the center of the topic's icon.
-         *  width, height           Box size.
-         *  label_wrapper
-         *
-         * @param   topic   A TopicViewmodel.
-         */
-        function TopicView(topic, ctx) {
-
-            var self = this
-
-            this.id = topic.id
-            this.x = topic.x
-            this.y = topic.y
-
-            init(topic);
-
-            // ---
-
-            this.move_by = function(dx, dy) {
-                this.x += dx
-                this.y += dy
-            }
-
-            /**
-             * @param   topic   A TopicViewmodel.
-             */
-            this.update = function(topic) {
-                init(topic)
-            }
-
-            // ---
-
-            function init(topic) {
-                var label = js.truncate(topic.label, dm4c.MAX_TOPIC_LABEL_CHARS)
-                self.label_wrapper = new js.TextWrapper(label, dm4c.MAX_TOPIC_LABEL_WIDTH, 19, ctx)
-                                                                        // line height 19px = 1.2em
-                //
-                var size = self.label_wrapper.get_size()
-                var line_height = self.label_wrapper.get_line_height()
-                self.width = Math.max(size.width, line_height)
-                self.height = Math.max(size.height, line_height)
-                
-            }
-        }
-    }
-
     // === Webclient Listeners ===
 
     /**
@@ -82,4 +12,57 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
             .get_topicmap_renderer("dm4.webclient.default_topicmap_renderer")
             .add_customizer(BoxCustomizer)
     })
+
+    // ------------------------------------------------------------------------------------------------- Private Classes
+
+    var BOX_COLOR = "rgb(255, 207, 103)"
+    var LABEL_COLOR = "black"
+    var LABEL_LINE_HEIGHT = 19  // in pixel, 19px = 1.2em
+
+    function BoxCustomizer(canvas_topics, canvas_assocs) {
+
+        /**
+         * Adds "width" and "height" properties to the topic view. The CanvasView relies on these for click detection.
+         * Adds "label_wrapper" proprietary property.
+         * Adds "box_pos", label_pos_y" proprietary property. Updated on topic move.
+         *
+         * @param   tv      A TopicView object (defined in CanvasView),
+         *                  has "id", "type_uri", "label", "x", "y" properties.
+         */
+        this.update_topic = function(tv, ctx) {
+            init_label(tv, ctx)
+            init_pos(tv)
+        }
+
+        this.move_topic = function(tv) {
+            init_pos(tv)
+        }
+
+        this.draw_topic = function(tv, ctx) {
+            // box
+            ctx.fillStyle = BOX_COLOR
+            ctx.fillRect(tv.box_pos.x, tv.box_pos.y, tv.width, tv.height)
+            // label
+            ctx.fillStyle = LABEL_COLOR
+            tv.label_wrapper.draw(tv.box_pos.x, tv.label_pos_y, ctx)
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------- Private Functions
+
+    function init_label(tv, ctx) {
+        var label = js.truncate(tv.label, dm4c.MAX_TOPIC_LABEL_CHARS)
+        tv.label_wrapper = new js.TextWrapper(label, dm4c.MAX_TOPIC_LABEL_WIDTH, LABEL_LINE_HEIGHT, ctx)
+        var size = tv.label_wrapper.get_size()
+        tv.width = Math.max(size.width, LABEL_LINE_HEIGHT)
+        tv.height = Math.max(size.height, LABEL_LINE_HEIGHT)
+    }
+
+    function init_pos(tv) {
+        tv.box_pos = {
+            x: tv.x - tv.width / 2,
+            y: tv.y - tv.height / 2
+        }
+        tv.label_pos_y = tv.box_pos.y + LABEL_LINE_HEIGHT - 4
+    }
 })
