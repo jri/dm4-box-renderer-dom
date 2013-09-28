@@ -2,7 +2,7 @@
 DeepaMehta 4 Box Renderer
 =========================
 
-A DeepaMehta 4 plugin that illustrates the development of a Topicmap Renderer Customizer.  
+A simple DeepaMehta 4 plugin that illustrates the development of a Topicmap Renderer Customizer.  
 The Box Renderer replaces the default topicmap topic rendering (icon + label) by "label in orange box".
 
 DeepaMehta 4 is a platform for collaboration and knowledge management.  
