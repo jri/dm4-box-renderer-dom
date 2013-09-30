@@ -15,7 +15,7 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
     // ------------------------------------------------------------------------------------------------- Private Classes
 
-    function BoxCustomizer(canvas_topics, canvas_assocs) {
+    function BoxCustomizer(canvas_view) {
 
         var BOX_COLOR = "rgb(154, 216, 255)"
         var BOX_PAD_HORIZ = 16
@@ -61,6 +61,16 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
             ctx.drawImage(icon, tv.icon_pos.x, tv.icon_pos.y, tv.icon_size.width, tv.icon_size.height)
         }
 
+        this.on_mousedown = function(pos, modifier) {
+            var tv = find_topic_via_icon(pos.topicmap)
+            if (tv) {
+                dm4c.do_select_topic(tv.id)
+                dm4c.topicmap_renderer.begin_association(tv.id, pos.canvas.x, pos.canvas.y)
+            } else {
+                return true     // perform default behavoir
+            }
+        }
+
         // ------------------------------------------------------------------------------------------- Private Functions
 
         function update_label_and_icon(tv, ctx) {
@@ -93,6 +103,18 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
                 x: tv.box_pos.x + tv.width - tv.icon_size.width / ICON_OFFSET_FACTOR,
                 y: tv.box_pos.y + tv.height - tv.icon_size.height / ICON_OFFSET_FACTOR
             }
+        }
+
+        // ---
+
+        function find_topic_via_icon(pos) {
+            return canvas_view.iterate_topics(function(tv) {
+                if (pos.x >= tv.icon_pos.x && pos.x < tv.icon_pos.x + tv.icon_size.width &&
+                    pos.y >= tv.icon_pos.y && pos.y < tv.icon_pos.y + tv.icon_size.height) {
+                    //
+                    return tv
+                }
+            })
         }
     }
 })
