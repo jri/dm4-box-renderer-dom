@@ -15,4 +15,33 @@
         <artifactId>deepamehta-plugin-parent</artifactId>
         <version>4.1.3-SNAPSHOT</version>
     </parent>
+
+    <dependencies>
+        <dependency>
+            <groupId>de.deepamehta</groupId>
+            <artifactId>deepamehta-core</artifactId>
+            <version>4.1.3-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>de.deepamehta</groupId>
+            <artifactId>deepamehta-topicmaps</artifactId>
+            <version>4.1.3-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Bundle-Activator>
+                            de.deepamehta.plugins.boxrenderer.BoxRendererPlugin
+                        </Bundle-Activator>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
