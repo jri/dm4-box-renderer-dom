@@ -1,6 +1,7 @@
 package de.deepamehta.plugins.boxrenderer;
 
 import de.deepamehta.core.osgi.PluginActivator;
+import de.deepamehta.core.storage.spi.DeepaMehtaTransaction;
 
 import de.deepamehta.plugins.topicmaps.ViewmodelCustomizer;
 import de.deepamehta.plugins.topicmaps.service.TopicmapsService;
@@ -14,6 +15,16 @@ import de.deepamehta.core.service.annotation.ConsumesService;
 
 public class BoxRendererPlugin extends PluginActivator implements ViewmodelCustomizer {
 
+    // ------------------------------------------------------------------------------------------------------- Constants
+
+    private String[] COLORS = {
+        "rgb(154, 216, 255)",
+        "rgb(216, 255, 154)",
+        "rgb(255, 154, 216)"
+    };
+
+    // -------------------------------------------------------------------------------------------------- Public Methods
+
 
 
     // ******************************************
@@ -24,10 +35,29 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
 
     @Override
     public void modifyViewProperties(Topic topic, CompositeValueModel viewProps) {
-        // use the topic to navigate the DB and/or fetch properties
-        //
-        viewProps.put("dm4.boxrenderer.color", "rgb(154, 216, 255)");
-        viewProps.put("dm4.boxrenderer.shape", "rectangle");
+        String color, shape;
+        if (topic.hasProperty("dm4.boxrenderer.color")) {
+            // fetch props from DB
+            color = (String) topic.getProperty("dm4.boxrenderer.color");
+            shape = (String) topic.getProperty("dm4.boxrenderer.shape");
+        } else {
+            // store new props in DB
+            color = COLORS[(int) (3 * Math.random())];
+            shape = "rectangle";
+            DeepaMehtaTransaction tx = dms.beginTx();
+            try {
+                topic.setProperty("dm4.boxrenderer.color", color, false);   // addToIndex = false
+                topic.setProperty("dm4.boxrenderer.shape", shape, false);   // addToIndex = false
+                tx.success();
+            } catch (Exception e) {
+                throw new RuntimeException("Storing view properties failed", e);
+            } finally {
+                tx.finish();
+            }
+        }
+        // add to view props
+        viewProps.put("dm4.boxrenderer.color", color);
+        viewProps.put("dm4.boxrenderer.shape", shape);  // not yet used at client-side. Just for illustration purpose.
     }
 
 

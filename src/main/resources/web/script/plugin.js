@@ -17,7 +17,6 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
     function BoxCustomizer(canvas_view) {
 
-        var BOX_COLOR = "rgb(154, 216, 255)"
         var BOX_PAD_HORIZ = 16
         var BOX_PAD_VERT = 4
         var LABEL_COLOR = "black"
@@ -49,7 +48,7 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
         this.draw_topic = function(tv, ctx) {
             // 1) box
-            ctx.fillStyle = BOX_COLOR
+            ctx.fillStyle = tv.view_props["dm4.boxrenderer.color"]
             ctx.fillRect(tv.x1, tv.y1, tv.width, tv.height)
             // 2) label
             ctx.fillStyle = LABEL_COLOR
