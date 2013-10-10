@@ -4,13 +4,15 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
     /**
      * Note: the Topicmaps plugin instantiates the topicmap renderers (as provided by the
-     * installed plugins) at "init" time. Registering our topicmap renderer customizer at
-     * "init_2" ensures the respective topicmap renderer is available already.
+     * installed plugins) at "init" time. Registering our customizers at "init_2" ensures
+     * the respective topicmap renderer is available already.
      */
     dm4c.add_listener("init_2", function() {
-        dm4c.get_plugin("de.deepamehta.topicmaps")
+        var canvas_renderer = dm4c.get_plugin("de.deepamehta.topicmaps")
             .get_topicmap_renderer("dm4.webclient.default_topicmap_renderer")
-            .add_customizer(BoxCustomizer)
+        //
+        canvas_renderer.add_view_customizer(BoxCustomizer)
+        canvas_renderer.add_viewmodel_customizer(BoxViewmodel)
     })
 
     // ------------------------------------------------------------------------------------------------- Private Classes
@@ -115,6 +117,14 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
                     return tv
                 }
             })
+        }
+    }
+
+    function BoxViewmodel() {
+
+        this.modify_view_properties = function(topic, view_props) {
+            view_props["dm4.boxrenderer.color"] = "rgb(255, 154, 216)"
+            view_props["dm4.boxrenderer.shape"] = "rectangle"   // not used. Just for illustration purpose.
         }
     }
 })
