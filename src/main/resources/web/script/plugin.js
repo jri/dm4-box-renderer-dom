@@ -73,7 +73,7 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
             }
         }
 
-        // ------------------------------------------------------------------------------------------- Private Functions
+        // ---
 
         function update_label_and_icon(tv, ctx) {
             // label
@@ -122,8 +122,14 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
     function BoxViewmodel() {
 
-        this.modify_view_properties = function(topic, view_props) {
-            view_props["dm4.boxrenderer.color"] = "rgb(255, 154, 216)"
+        var COLORS = [
+            "rgb(154,216,255)",
+            "rgb(216,255,154)",
+            "rgb(255,154,216)"
+        ];
+
+        this.enrich_view_properties = function(topic, view_props) {
+            view_props["dm4.boxrenderer.color"] = COLORS[Math.floor(3 * Math.random())]
             view_props["dm4.boxrenderer.shape"] = "rectangle"   // not used. Just for illustration purpose.
         }
     }
