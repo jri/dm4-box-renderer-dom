@@ -1,5 +1,11 @@
 dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
+    // must match server-side (see BoxRendererPlugin.java)
+    // must match top/left in color dialog (see below)
+    var DEFAULT_COLOR = "hsl(210,100%,90%)"
+
+    var _canvas_view
+
     // === Webclient Listeners ===
 
     /**
@@ -15,6 +21,48 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
         canvas_renderer.add_viewmodel_customizer(BoxViewmodel)
     })
 
+    dm4c.add_listener("topic_commands", function(topic) {
+        return [
+            {
+                is_separator: true,
+                context: "context-menu"
+            },
+            {
+                label:   "Set Color",
+                handler: do_open_color_dialog,
+                context: "context-menu"
+            }
+        ]
+
+        function do_open_color_dialog() {
+
+            var content = $()
+            add_color_row("100%", "90%")
+            add_color_row( "80%", "80%")
+            //
+            var color_dialog = dm4c.ui.dialog({
+                id: "color-dialog",
+                title: "Set Color",
+                content: content
+            })
+            color_dialog.open()
+
+            function add_color_row(saturation, light) {
+                for (var i = 4; i < 12; i++) {
+                    add_color("hsl(" + [(45 * i + 30) % 360, saturation, light] + ")")
+                }
+                content = content.add($("<br>").attr("clear", "all"))
+            }
+
+            function add_color(color) {
+                content = content.add($("<div>").addClass("color").css("background-color", color).click(function() {
+                    color_dialog.destroy()
+                    _canvas_view.set_view_properties(topic.id, {"dm4.boxrenderer.color": color})
+                }))
+            }
+        }
+    })
+
     // ------------------------------------------------------------------------------------------------- Private Classes
 
     function BoxCustomizer(canvas_view) {
@@ -27,6 +75,8 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
         var LABEL_LINE_HEIGHT = 19  // in pixel, 19px = 1.2em
         var ICON_SCALE_FACTOR = 2
         var ICON_OFFSET_FACTOR = 1.5
+
+        _canvas_view = canvas_view
 
         // ---
 
@@ -122,14 +172,8 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
     function BoxViewmodel() {
 
-        var COLORS = [
-            "rgb(154,216,255)",
-            "rgb(216,255,154)",
-            "rgb(255,154,216)"
-        ];
-
         this.enrich_view_properties = function(topic, view_props) {
-            view_props["dm4.boxrenderer.color"] = COLORS[Math.floor(3 * Math.random())]
+            view_props["dm4.boxrenderer.color"] = DEFAULT_COLOR
             view_props["dm4.boxrenderer.shape"] = "rectangle"   // not used. Just for illustration purpose.
         }
     }

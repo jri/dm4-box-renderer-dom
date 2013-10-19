@@ -17,11 +17,8 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
 
     // ------------------------------------------------------------------------------------------------------- Constants
 
-    private String[] COLORS = {
-        "rgb(154,216,255)",
-        "rgb(216,255,154)",
-        "rgb(255,154,216)"
-    };
+    // must match client-side (see plugin.js)
+    private String DEFAULT_COLOR = "hsl(210,100%,90%)";
 
     // -------------------------------------------------------------------------------------------------- Public Methods
 
@@ -44,7 +41,7 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
             shape = (String) topic.getProperty("dm4.boxrenderer.shape");
         } else {
             // set defaults
-            color = COLORS[(int) (3 * Math.random())];
+            color = DEFAULT_COLOR;
             shape = "rectangle";
             // store props in DB
             storeViewProperties(topic, color, shape);
@@ -56,18 +53,22 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
 
     @Override
     public void storeViewProperties(Topic topic, CompositeValueModel viewProps) {
-        String color = viewProps.getString("dm4.boxrenderer.color");
-        String shape = viewProps.getString("dm4.boxrenderer.shape");
+        String color = viewProps.getString("dm4.boxrenderer.color", null);
+        String shape = viewProps.getString("dm4.boxrenderer.shape", null);
         storeViewProperties(topic, color, shape);
     }
 
     // ------------------------------------------------------------------------------------------------- Private Methods
 
-    public void storeViewProperties(Topic topic, String color, String shape) {
+    private void storeViewProperties(Topic topic, String color, String shape) {
         DeepaMehtaTransaction tx = dms.beginTx();
         try {
-            topic.setProperty("dm4.boxrenderer.color", color, false);   // addToIndex = false
-            topic.setProperty("dm4.boxrenderer.shape", shape, false);   // addToIndex = false
+            if (color != null) {
+                topic.setProperty("dm4.boxrenderer.color", color, false);   // addToIndex = false
+            }
+            if (shape != null) {
+                topic.setProperty("dm4.boxrenderer.shape", shape, false);   // addToIndex = false
+            }
             tx.success();
         } catch (Exception e) {
             throw new RuntimeException("Storing view properties failed", e);
