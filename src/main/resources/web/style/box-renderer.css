@@ -2,9 +2,13 @@
     min-height: 0px !important;     /* Overrides style attribute */
 }
 
-#color-dialog .color {
+#color-dialog .color-box {
     width: 32px;
     height: 32px;
     margin: 3px;
     float: left;
+}
+
+#color-dialog .color-box.selected {
+    box-shadow: 0 0 1em blue;
 }

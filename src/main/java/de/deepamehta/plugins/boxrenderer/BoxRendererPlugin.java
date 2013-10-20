@@ -17,8 +17,10 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
 
     // ------------------------------------------------------------------------------------------------------- Constants
 
-    // must match client-side (see plugin.js)
-    private String DEFAULT_COLOR = "hsl(210,100%,90%)";
+    private static final String DEFAULT_COLOR = "hsl(210,100%,90%)";    // must match client-side (see plugin.js)
+
+    private static final String PROP_COLOR = "dm4.boxrenderer.color";
+    private static final String PROP_SHAPE = "dm4.boxrenderer.shape";
 
     // -------------------------------------------------------------------------------------------------- Public Methods
 
@@ -35,10 +37,10 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
     @Override
     public void enrichViewProperties(Topic topic, CompositeValueModel viewProps) {
         String color, shape;
-        if (topic.hasProperty("dm4.boxrenderer.color")) {
+        if (topic.hasProperty(PROP_COLOR)) {
             // fetch props from DB
-            color = (String) topic.getProperty("dm4.boxrenderer.color");
-            shape = (String) topic.getProperty("dm4.boxrenderer.shape");
+            color = (String) topic.getProperty(PROP_COLOR);
+            shape = (String) topic.getProperty(PROP_SHAPE);
         } else {
             // set defaults
             color = DEFAULT_COLOR;
@@ -47,14 +49,14 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
             storeViewProperties(topic, color, shape);
         }
         // enrich view props
-        viewProps.put("dm4.boxrenderer.color", color);
-        viewProps.put("dm4.boxrenderer.shape", shape);  // not yet used at client-side. Just for illustration purpose.
+        viewProps.put(PROP_COLOR, color);
+        viewProps.put(PROP_SHAPE, shape);  // not yet used at client-side. Just for illustration purpose.
     }
 
     @Override
     public void storeViewProperties(Topic topic, CompositeValueModel viewProps) {
-        String color = viewProps.getString("dm4.boxrenderer.color", null);
-        String shape = viewProps.getString("dm4.boxrenderer.shape", null);
+        String color = viewProps.getString(PROP_COLOR, null);
+        String shape = viewProps.getString(PROP_SHAPE, null);
         storeViewProperties(topic, color, shape);
     }
 
@@ -64,10 +66,10 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
         DeepaMehtaTransaction tx = dms.beginTx();
         try {
             if (color != null) {
-                topic.setProperty("dm4.boxrenderer.color", color, false);   // addToIndex = false
+                topic.setProperty(PROP_COLOR, color, false);   // addToIndex = false
             }
             if (shape != null) {
-                topic.setProperty("dm4.boxrenderer.shape", shape, false);   // addToIndex = false
+                topic.setProperty(PROP_SHAPE, shape, false);   // addToIndex = false
             }
             tx.success();
         } catch (Exception e) {

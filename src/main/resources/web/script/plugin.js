@@ -1,8 +1,7 @@
 dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
-    // must match server-side (see BoxRendererPlugin.java)
-    // must match top/left in color dialog (see below)
-    var DEFAULT_COLOR = "hsl(210,100%,90%)"
+    var PROP_COLOR = "dm4.boxrenderer.color"
+    var PROP_SHAPE = "dm4.boxrenderer.shape"
 
     var _canvas_view
 
@@ -17,7 +16,7 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
         var canvas_renderer = dm4c.get_plugin("de.deepamehta.topicmaps")
             .get_topicmap_renderer("dm4.webclient.default_topicmap_renderer")
         //
-        canvas_renderer.add_view_customizer(BoxCustomizer)
+        canvas_renderer.add_view_customizer(BoxView)
         canvas_renderer.add_viewmodel_customizer(BoxViewmodel)
     })
 
@@ -36,6 +35,7 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
         function do_open_color_dialog() {
 
+            var current_color = _canvas_view.get_topic(topic.id).view_props[PROP_COLOR]
             var content = $()
             add_color_row("100%", "90%")
             add_color_row( "80%", "80%")
@@ -55,17 +55,23 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
             }
 
             function add_color(color) {
-                content = content.add($("<div>").addClass("color").css("background-color", color).click(function() {
+                var color_box = $("<div>").addClass("color-box").css("background-color", color).click(function() {
+                    var view_props = {}
+                    view_props[PROP_COLOR] = color
+                    _canvas_view.set_view_properties(topic.id, view_props)
                     color_dialog.destroy()
-                    _canvas_view.set_view_properties(topic.id, {"dm4.boxrenderer.color": color})
-                }))
+                })
+                if (color == current_color) {
+                    color_box.addClass("selected")
+                }
+                content = content.add(color_box)
             }
         }
     })
 
     // ------------------------------------------------------------------------------------------------- Private Classes
 
-    function BoxCustomizer(canvas_view) {
+    function BoxView(canvas_view) {
 
         var BOX_PAD_HORIZ = 16
         var BOX_PAD_VERT = 4
@@ -100,7 +106,7 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
         this.draw_topic = function(tv, ctx) {
             // 1) box
-            ctx.fillStyle = tv.view_props["dm4.boxrenderer.color"]
+            ctx.fillStyle = tv.view_props[PROP_COLOR]
             ctx.fillRect(tv.x1, tv.y1, tv.width, tv.height)
             // 2) label
             ctx.fillStyle = LABEL_COLOR
@@ -172,9 +178,12 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
     function BoxViewmodel() {
 
+        var DEFAULT_COLOR = "hsl(210,100%,90%)"     // must match server-side (see BoxRendererPlugin.java)
+                                                    // must match top/left in color dialog (see below)
+
         this.enrich_view_properties = function(topic, view_props) {
-            view_props["dm4.boxrenderer.color"] = DEFAULT_COLOR
-            view_props["dm4.boxrenderer.shape"] = "rectangle"   // not used. Just for illustration purpose.
+            view_props[PROP_COLOR] = DEFAULT_COLOR
+            view_props[PROP_SHAPE] = "rectangle"    // not used. Just for illustration purpose.
         }
     }
 })
