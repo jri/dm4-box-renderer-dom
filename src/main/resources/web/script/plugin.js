@@ -86,6 +86,12 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
         // ---
 
+        this.topic_dom = function(tvm, topic_dom) {
+            topic_dom.text(tvm.label).css("background-color", tvm.view_props[PROP_COLOR])
+        }
+
+        // ---
+
         /**
          * Adds "x1", "y1", "x2", "y2" properties to the topic view. Click detection relies on this bounding box.
          * Adds "width" and "height" proprietary properties.         Updated on topic update (label or type changed).
