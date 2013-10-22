@@ -5,6 +5,12 @@
     padding-right: 12px;
 }
 
+#topicmap-panel .topic .mini-icon {
+    position: absolute;
+}
+
+/* Color Dialog */
+
 #color-dialog {
     min-height: 0px !important;     /* Overrides style attribute */
 }

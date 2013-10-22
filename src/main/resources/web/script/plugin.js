@@ -86,8 +86,17 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
         // ---
 
-        this.topic_dom = function(tvm, topic_dom) {
-            topic_dom.text(tvm.label).css("background-color", tvm.view_props[PROP_COLOR])
+        this.topic_dom = function(topic_view, topic_dom) {
+            topic_dom.text(topic_view.label).css("background-color", topic_view.view_props[PROP_COLOR])
+        }
+
+        this.topic_dom_appendix = function(topic_view, topic_dom) {
+            var mini_icon = $("<img>").addClass("mini-icon").attr("src", dm4c.get_type_icon_src(topic_view.type_uri))
+            topic_dom.append(mini_icon)
+            mini_icon.width(mini_icon.width() / ICON_SCALE_FACTOR).css({    // the image height is scaled proportionally
+                top:  topic_dom.outerHeight() - mini_icon.height() / ICON_OFFSET_FACTOR,
+                left: topic_dom.outerWidth()  - mini_icon.width()  / ICON_OFFSET_FACTOR
+            })
         }
 
         // ---
