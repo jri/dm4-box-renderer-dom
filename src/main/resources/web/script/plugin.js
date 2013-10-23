@@ -87,16 +87,15 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
         // ---
 
         this.topic_dom = function(topic_view, topic_dom) {
-            topic_dom.text(topic_view.label).css("background-color", topic_view.view_props[PROP_COLOR])
+            topic_dom.css("background-color", topic_view.view_props[PROP_COLOR])
+                .append($("<div>").addClass("topic-label").text(topic_view.label))
         }
 
         this.topic_dom_appendix = function(topic_view, topic_dom) {
             var mini_icon = $("<img>").addClass("mini-icon").attr("src", dm4c.get_type_icon_src(topic_view.type_uri))
             topic_dom.append(mini_icon)
-            mini_icon.width(mini_icon.width() / ICON_SCALE_FACTOR).css({    // the image height is scaled proportionally
-                top:  topic_dom.outerHeight() - mini_icon.height() / ICON_OFFSET_FACTOR,
-                left: topic_dom.outerWidth()  - mini_icon.width()  / ICON_OFFSET_FACTOR
-            })
+            mini_icon.width(mini_icon.width() / ICON_SCALE_FACTOR)  // the image height is scaled proportionally
+            position_mini_icon(mini_icon, topic_dom)
         }
 
         // ---
@@ -113,6 +112,7 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
         this.update_topic = function(tv, ctx) {
             update_label_and_icon(tv, ctx)
             update_geometry(tv)
+            update_topic_dom(tv)
         }
 
         this.move_topic = function(tv) {
@@ -178,7 +178,19 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
             }
         }
 
+        function update_topic_dom(tv) {
+            $(".topic-label", tv.dom).text(tv.label)
+            position_mini_icon($(".mini-icon", tv.dom), tv.dom)
+        }
+
         // ---
+
+        function position_mini_icon(mini_icon, topic_dom) {
+            mini_icon.css({
+                top:  topic_dom.outerHeight() - mini_icon.height() / ICON_OFFSET_FACTOR,
+                left: topic_dom.outerWidth()  - mini_icon.width()  / ICON_OFFSET_FACTOR
+            })
+        }
 
         function detect_topic_via_icon(pos) {
             return canvas_view.iterate_topics(function(tv) {
