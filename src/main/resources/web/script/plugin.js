@@ -93,9 +93,20 @@ dm4c.add_plugin("de.deepamehta.boxrenderer", function() {
 
         this.topic_dom_appendix = function(topic_view, topic_dom) {
             var mini_icon = $("<img>").addClass("mini-icon").attr("src", dm4c.get_type_icon_src(topic_view.type_uri))
+                .mousedown(function(event) {
+                    // ### close_context_menu()
+                    var pos = canvas_view.pos(event)
+                    dm4c.do_select_topic(topic_view.id)
+                    dm4c.topicmap_renderer.begin_association(topic_view.id, pos.x, pos.y)
+                    return false    // avoids the browser from dragging an icon copy
+                })
             topic_dom.append(mini_icon)
             mini_icon.width(mini_icon.width() / ICON_SCALE_FACTOR)  // the image height is scaled proportionally
             position_mini_icon(mini_icon, topic_dom)
+        }
+
+        this.topic_dom_draggable_handle = function(topic_dom, handles) {
+            handles.push($(".topic-label", topic_dom))
         }
 
         // ---
