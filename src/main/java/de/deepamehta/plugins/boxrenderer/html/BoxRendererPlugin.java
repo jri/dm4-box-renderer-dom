@@ -1,4 +1,4 @@
-package de.deepamehta.plugins.boxrenderer;
+package de.deepamehta.plugins.boxrenderer.html;
 
 import de.deepamehta.core.osgi.PluginActivator;
 import de.deepamehta.core.storage.spi.DeepaMehtaTransaction;

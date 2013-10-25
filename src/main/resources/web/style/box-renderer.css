@@ -7,6 +7,12 @@
     padding-right: 12px;
 }
 
+#topicmap-panel .topic .topic-label {
+    max-width: 200px;
+    min-width: 18px;    /* draggable handle for empty topics */
+    min-height: 18px;   /* draggable handle for empty topics */
+}
+
 #topicmap-panel .topic .mini-icon {
     position: absolute;
 }
