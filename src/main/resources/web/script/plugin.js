@@ -81,12 +81,13 @@ dm4c.add_plugin("de.deepamehta.box-renderer-html", function() {
         // ---
 
         this.topic_dom = function(topic_view, topic_dom) {
-            topic_dom.css("background-color", topic_view.view_props[PROP_COLOR])
-                .append($("<div>").addClass("topic-label").text(topic_view.label))
+            topic_dom.append($("<div>").addClass("topic-label"))
+            set_topic_label(topic_dom, topic_view.label)
+            set_background_color(topic_dom, topic_view.view_props[PROP_COLOR])
         }
 
         this.topic_dom_appendix = function(topic_view, topic_dom) {
-            var mini_icon = $("<img>").addClass("mini-icon").attr("src", dm4c.get_type_icon_src(topic_view.type_uri))
+            var mini_icon = $("<img>").addClass("mini-icon")
                 .mousedown(function(event) {
                     // ### close_context_menu()
                     var pos = canvas_view.pos(event)
@@ -95,8 +96,11 @@ dm4c.add_plugin("de.deepamehta.box-renderer-html", function() {
                     return false    // avoids the browser from dragging an icon copy
                 })
             topic_dom.append(mini_icon)
+            set_mini_icon_src(mini_icon, topic_view.type_uri)
             mini_icon.width(mini_icon.width() / ICON_SCALE_FACTOR)  // the image height is scaled proportionally
-            position_mini_icon(mini_icon, topic_dom)
+            // ### TODO: scaling should perform on update_topic() as well. But the icon would shrink each time
+            // it is updated (scaling is relative). We could create a new <img> element each time. Better would
+            // be not to scale the <img> element but the underlying JavaScript Image object.
         }
 
         this.topic_dom_draggable_handle = function(topic_dom, handles) {
@@ -114,21 +118,39 @@ dm4c.add_plugin("de.deepamehta.box-renderer-html", function() {
         // ---
 
         /**
-         * @param   tv      A TopicView object (defined in CanvasView),
-         *                  has "id", "type_uri", "label", "x", "y" properties.
+         * @param   topic_view      A TopicView object.
+         *                          Has "id", "type_uri", "label", "x", "y", "dom" properties
+         *                          plus the custom view properties.
          */
-        this.update_topic = function(tv, ctx) {
-            update_topic_dom(tv)
+        this.update_topic = function(topic_view, ctx) {
+            var tv = topic_view
+            // label
+            set_topic_label(tv.dom, tv.label)
+            // mini icon
+            var mini_icon = $(".mini-icon", tv.dom)
+            set_mini_icon_src(mini_icon, tv.type_uri)
+            set_mini_icon_position(mini_icon, tv.dom)
+        }
+
+        this.update_view_properties = function(topic_view) {
+            set_background_color(topic_view.dom, topic_view.view_props[PROP_COLOR])
         }
 
         // ---
 
-        function update_topic_dom(tv) {
-            $(".topic-label", tv.dom).text(tv.label)
-            position_mini_icon($(".mini-icon", tv.dom), tv.dom)
+        function set_topic_label(topic_dom, label) {
+            $(".topic-label", topic_dom).text(label)
         }
 
-        function position_mini_icon(mini_icon, topic_dom) {
+        function set_background_color(topic_dom, color) {
+            topic_dom.css("background-color", color)
+        }
+
+        function set_mini_icon_src(mini_icon, type_uri) {
+            mini_icon.attr("src", dm4c.get_type_icon_src(type_uri))
+        }
+
+        function set_mini_icon_position(mini_icon, topic_dom) {
             mini_icon.css({
                 top:  topic_dom.outerHeight() - mini_icon.height() / ICON_OFFSET_FACTOR,
                 left: topic_dom.outerWidth()  - mini_icon.width()  / ICON_OFFSET_FACTOR
