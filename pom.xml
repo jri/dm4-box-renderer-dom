@@ -4,9 +4,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>DeepaMehta 4 Box Renderer (HTML)</name>
+    <name>DeepaMehta 4 Box Renderer (DOM)</name>
     <groupId>de.deepamehta</groupId>
-    <artifactId>deepamehta-box-renderer-html</artifactId>
+    <artifactId>deepamehta-box-renderer-dom</artifactId>
     <version>4.1.3-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
@@ -37,7 +37,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-Activator>
-                            de.deepamehta.plugins.boxrenderer.html.BoxRendererPlugin
+                            de.deepamehta.plugins.boxrenderer.dom.BoxRendererPlugin
                         </Bundle-Activator>
                     </instructions>
                 </configuration>

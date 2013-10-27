@@ -1,4 +1,4 @@
-dm4c.add_plugin("de.deepamehta.box-renderer-html", function() {
+dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
 
     var PROP_COLOR = "dm4.boxrenderer.color"
     var PROP_SHAPE = "dm4.boxrenderer.shape"
