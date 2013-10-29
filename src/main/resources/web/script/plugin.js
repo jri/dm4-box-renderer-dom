@@ -158,8 +158,8 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
 
             function set_position() {
                 mini_icon.css({
-                    top:  topic_dom.outerHeight() - mini_icon.height() / ICON_OFFSET_FACTOR,
-                    left: topic_dom.outerWidth()  - mini_icon.width()  / ICON_OFFSET_FACTOR
+                    top:  Math.floor(topic_dom.outerHeight() - mini_icon.height() / ICON_OFFSET_FACTOR),
+                    left: Math.floor(topic_dom.outerWidth()  - mini_icon.width()  / ICON_OFFSET_FACTOR)
                 })
             }
 
