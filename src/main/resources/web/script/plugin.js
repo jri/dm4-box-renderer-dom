@@ -1,9 +1,12 @@
 dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
 
+    var DEFAULT_TOPIC_COLOR = "hsl(210,100%,90%)"   // must match server-side (see BoxRendererPlugin.java)
+                                                    // must match top/left in color dialog (see below)
+
     var PROP_COLOR = "dm4.boxrenderer.color"
     var PROP_SHAPE = "dm4.boxrenderer.shape"
 
-    var _canvas_view
+    var canvas_view
 
     // === Webclient Listeners ===
 
@@ -35,7 +38,7 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
 
         function do_open_color_dialog() {
 
-            var current_color = _canvas_view.get_topic(topic.id).view_props[PROP_COLOR]
+            var current_color = canvas_view.get_topic(topic.id).view_props[PROP_COLOR]
             var content = $()
             add_color_row("100%", "90%")
             add_color_row( "80%", "80%")
@@ -58,7 +61,7 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
                 var color_box = $("<div>").addClass("color-box").css("background-color", color).click(function() {
                     var view_props = {}
                     view_props[PROP_COLOR] = color
-                    _canvas_view.set_view_properties(topic.id, view_props)
+                    canvas_view.set_view_properties(topic.id, view_props)
                     color_dialog.destroy()
                 })
                 if (color == current_color) {
@@ -71,36 +74,24 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
 
     // ------------------------------------------------------------------------------------------------- Private Classes
 
-    function BoxView(canvas_view) {
+    function BoxView(_canvas_view) {
 
         var ICON_SCALE_FACTOR = 2
         var ICON_OFFSET_FACTOR = 1.5
 
-        _canvas_view = canvas_view
+        // widen scope
+        canvas_view = _canvas_view
 
-        // ---
+        // === Define Hooks ===
 
-        this.topic_dom = function(topic_view, topic_dom) {
-            topic_dom.append($("<div>").addClass("topic-label"))
-            set_topic_label(topic_dom, topic_view.label)
-            set_background_color(topic_dom, topic_view.view_props[PROP_COLOR])
-        }
-
-        this.topic_dom_appendix = function(topic_view, topic_dom) {
-            var mini_icon = $("<img>").addClass("mini-icon")
-                .mousedown(function(event) {
-                    // ### close_context_menu()
-                    var pos = canvas_view.pos(event)
-                    dm4c.do_select_topic(topic_view.id)
-                    dm4c.topicmap_renderer.begin_association(topic_view.id, pos.x, pos.y)
-                    return false    // avoids the browser from dragging an icon copy
-                })
-            topic_dom.append(mini_icon)
-            set_mini_icon_src(mini_icon, topic_view.type_uri)
-            mini_icon.width(mini_icon.width() / ICON_SCALE_FACTOR)  // the image height is scaled proportionally
-            // ### TODO: scaling should perform on update_topic() as well. But the icon would shrink each time
-            // it is updated (scaling is relative). We could create a new <img> element each time. Better would
-            // be not to scale the <img> element but the underlying JavaScript Image object.
+        this.topic_dom = function(topic_view) {
+            topic_view.dom.append($("<div>").addClass("topic-label"))
+            // Note: setting the label gives the topic DOM its size which is required by the framework
+            // in order to position the topic
+            sync_topic_label(topic_view)
+            sync_background_color(topic_view)
+            // Note: the mini icon is only created in update_topic() which is fired right after topic_dom().
+            // We must recreate the mini icon in update_topic() anyway as the icon size may change through retyping.
         }
 
         this.topic_dom_draggable_handle = function(topic_dom, handles) {
@@ -115,7 +106,7 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
             return true     // perform default behavoir
         }
 
-        // ---
+        // === Private Methods ===
 
         /**
          * @param   topic_view      A TopicView object.
@@ -123,48 +114,67 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
          *                          plus the custom view properties.
          */
         this.update_topic = function(topic_view, ctx) {
-            var tv = topic_view
-            // label
-            set_topic_label(tv.dom, tv.label)
-            // mini icon
-            var mini_icon = $(".mini-icon", tv.dom)
-            set_mini_icon_src(mini_icon, tv.type_uri)
-            set_mini_icon_position(mini_icon, tv.dom)
+            sync_topic_label(topic_view)
+            sync_mini_icon(topic_view)
         }
 
         this.update_view_properties = function(topic_view) {
-            set_background_color(topic_view.dom, topic_view.view_props[PROP_COLOR])
+            sync_background_color(topic_view)
         }
 
         // ---
 
-        function set_topic_label(topic_dom, label) {
-            $(".topic-label", topic_dom).text(label)
+        function sync_topic_label(topic_view) {
+            $(".topic-label", topic_view.dom).text(topic_view.label)
         }
 
-        function set_background_color(topic_dom, color) {
-            topic_dom.css("background-color", color)
+        function sync_background_color(topic_view) {
+            topic_view.dom.css("background-color", topic_view.view_props[PROP_COLOR])
         }
 
-        function set_mini_icon_src(mini_icon, type_uri) {
-            mini_icon.attr("src", dm4c.get_type_icon_src(type_uri))
-        }
+        function sync_mini_icon(topic_view) {
+            var topic_dom = topic_view.dom
+            // remove existing mini icon
+            $(".mini-icon", topic_dom).remove()
+            // create new one (the icon size might have changed through retyping)
+            var mini_icon = $("<img>").addClass("mini-icon")
+            topic_dom.append(mini_icon)
+            set_src()
+            set_size()
+            set_position()
+            add_mouse_handler()
 
-        function set_mini_icon_position(mini_icon, topic_dom) {
-            mini_icon.css({
-                top:  topic_dom.outerHeight() - mini_icon.height() / ICON_OFFSET_FACTOR,
-                left: topic_dom.outerWidth()  - mini_icon.width()  / ICON_OFFSET_FACTOR
-            })
+            function set_src() {
+                mini_icon.attr("src", dm4c.get_type_icon_src(topic_view.type_uri))
+            }
+
+            function set_size() {
+                mini_icon.width(mini_icon.width() / ICON_SCALE_FACTOR)  // the image height is scaled proportionally
+            }
+
+            function set_position() {
+                mini_icon.css({
+                    top:  topic_dom.outerHeight() - mini_icon.height() / ICON_OFFSET_FACTOR,
+                    left: topic_dom.outerWidth()  - mini_icon.width()  / ICON_OFFSET_FACTOR
+                })
+            }
+
+            function add_mouse_handler() {
+                mini_icon.mousedown(function(event) {
+                    // ### TODO: framework must close_context_menu()
+                    var pos = canvas_view.pos(event)
+                    dm4c.do_select_topic(topic_view.id)
+                    dm4c.topicmap_renderer.begin_association(topic_view.id, pos.x, pos.y)
+                    return false    // avoids the browser from dragging an icon copy
+                })
+            }
         }
     }
 
     function BoxViewmodel() {
 
-        var DEFAULT_COLOR = "hsl(210,100%,90%)"     // must match server-side (see BoxRendererPlugin.java)
-                                                    // must match top/left in color dialog (see below)
-
         this.enrich_view_properties = function(topic, view_props) {
-            view_props[PROP_COLOR] = DEFAULT_COLOR
+            view_props[PROP_COLOR] = DEFAULT_TOPIC_COLOR
             view_props[PROP_SHAPE] = "rectangle"    // not used. Just for illustration purpose.
         }
     }
