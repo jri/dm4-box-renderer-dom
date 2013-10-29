@@ -1,7 +1,7 @@
 dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
 
     var DEFAULT_TOPIC_COLOR = "hsl(210,100%,90%)"   // must match server-side (see BoxRendererPlugin.java)
-                                                    // must match top/left in color dialog (see below)
+                                                    // must match top/left color in color dialog (see below)
 
     var PROP_COLOR = "dm4.boxrenderer.color"
     var PROP_SHAPE = "dm4.boxrenderer.shape"
@@ -82,7 +82,9 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
         // widen scope
         canvas_view = _canvas_view
 
-        // === Define Hooks ===
+
+
+        // === Hook Implementations ===
 
         this.topic_dom = function(topic_view) {
             topic_view.dom.append($("<div>").addClass("topic-label"))
@@ -90,12 +92,28 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
             // in order to position the topic
             sync_topic_label(topic_view)
             sync_background_color(topic_view)
-            // Note: the mini icon is only created in update_topic() which is fired right after topic_dom().
-            // We must recreate the mini icon in update_topic() anyway as the icon size may change through retyping.
+            // Note: the mini icon is only created in on_update_topic() which is fired right after topic_dom().
+            // We must recreate the mini icon in on_update_topic() anyway as the icon size may change through retyping.
         }
 
         this.topic_dom_draggable_handle = function(topic_dom, handles) {
             handles.push($(".topic-label", topic_dom))
+        }
+
+        // ---
+
+        /**
+         * @param   topic_view      A TopicView object.
+         *                          Has "id", "type_uri", "label", "x", "y", "view_props", "dom" properties
+         *                          plus the viewmodel-derived custom properties.
+         */
+        this.on_update_topic = function(topic_view, ctx) {
+            sync_topic_label(topic_view)
+            sync_mini_icon(topic_view)
+        }
+
+        this.on_update_view_properties = function(topic_view) {
+            sync_background_color(topic_view)
         }
 
         // ---
@@ -106,23 +124,9 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
             return true     // perform default behavoir
         }
 
+
+
         // === Private Methods ===
-
-        /**
-         * @param   topic_view      A TopicView object.
-         *                          Has "id", "type_uri", "label", "x", "y", "dom" properties
-         *                          plus the custom view properties.
-         */
-        this.update_topic = function(topic_view, ctx) {
-            sync_topic_label(topic_view)
-            sync_mini_icon(topic_view)
-        }
-
-        this.update_view_properties = function(topic_view) {
-            sync_background_color(topic_view)
-        }
-
-        // ---
 
         function sync_topic_label(topic_view) {
             $(".topic-label", topic_view.dom).text(topic_view.label)
