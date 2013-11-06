@@ -13,6 +13,10 @@
     min-height: 18px;   /* draggable handle for empty topics */
 }
 
+#topicmap-panel .topic .topic-content {
+    max-width: 360px;
+}
+
 #topicmap-panel .topic .mini-icon {
     position: absolute;
 }

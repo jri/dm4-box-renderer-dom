@@ -50,6 +50,20 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
 
     @Override
     public void enrichViewProperties(Topic topic, CompositeValueModel viewProps) {
+        _enrichViewProperties(topic, viewProps);
+        _enrichTopic(topic);
+    }
+
+    @Override
+    public void storeViewProperties(Topic topic, CompositeValueModel viewProps) {
+        String color = viewProps.getString(PROP_COLOR, null);
+        String shape = viewProps.getString(PROP_SHAPE, null);
+        _storeViewProperties(topic, color, shape);
+    }
+
+    // ------------------------------------------------------------------------------------------------- Private Methods
+
+    private void _enrichViewProperties(Topic topic, CompositeValueModel viewProps) {
         String color, shape;
         if (topic.hasProperty(PROP_COLOR)) {
             // fetch props from DB
@@ -60,23 +74,22 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
             color = DEFAULT_COLOR;
             shape = "rectangle";
             // store props in DB
-            storeViewProperties(topic, color, shape);
+            _storeViewProperties(topic, color, shape);
         }
         // enrich view props
         viewProps.put(PROP_COLOR, color);
         viewProps.put(PROP_SHAPE, shape);  // not yet used at client-side. Just for illustration purpose.
     }
 
-    @Override
-    public void storeViewProperties(Topic topic, CompositeValueModel viewProps) {
-        String color = viewProps.getString(PROP_COLOR, null);
-        String shape = viewProps.getString(PROP_SHAPE, null);
-        storeViewProperties(topic, color, shape);
+    private void _enrichTopic(Topic topic) {
+        if (topic.getTypeUri().equals("dm4.notes.note")) {
+            topic.loadChildTopics("dm4.notes.text");
+        }
     }
 
-    // ------------------------------------------------------------------------------------------------- Private Methods
+    // ---
 
-    private void storeViewProperties(Topic topic, String color, String shape) {
+    private void _storeViewProperties(Topic topic, String color, String shape) {
         DeepaMehtaTransaction tx = dms.beginTx();
         try {
             if (color != null) {

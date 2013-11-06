@@ -88,16 +88,19 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
 
         this.topic_dom = function(topic_view) {
             topic_view.dom.append($("<div>").addClass("topic-label"))
-            // Note: setting the label gives the topic DOM its size which is required by the framework
+            if (topic_view.type_uri == "dm4.notes.note") {
+                topic_view.dom.append($("<div>").addClass("topic-content"))
+            }
+            // Note: setting the content gives the topic DOM its size which is required by the framework
             // in order to position the topic
-            sync_topic_label(topic_view)
+            sync_topic_content(topic_view)
             sync_background_color(topic_view)
             // Note: the mini icon is only created in on_update_topic() which is fired right after topic_dom().
             // We must recreate the mini icon in on_update_topic() anyway as the icon size may change through retyping.
         }
 
         this.topic_dom_draggable_handle = function(topic_dom, handles) {
-            handles.push($(".topic-label", topic_dom))
+            handles.push($(".topic-label, .topic-content", topic_dom))
         }
 
         // ---
@@ -108,7 +111,7 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
          *                          plus the viewmodel-derived custom properties.
          */
         this.on_update_topic = function(topic_view, ctx) {
-            sync_topic_label(topic_view)
+            sync_topic_content(topic_view)
             sync_mini_icon(topic_view)
         }
 
@@ -128,8 +131,15 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
 
         // === Private Methods ===
 
-        function sync_topic_label(topic_view) {
+        function sync_topic_content(topic_view) {
+            // label
             $(".topic-label", topic_view.dom).text(topic_view.label)
+            // content
+            if (topic_view.type_uri == "dm4.notes.note") {
+                // Note: newly created topics have an empty composite
+                var text = topic_view.composite["dm4.notes.text"]
+                $(".topic-content", topic_view.dom).html(text && text.value)
+            }
         }
 
         function sync_background_color(topic_view) {
