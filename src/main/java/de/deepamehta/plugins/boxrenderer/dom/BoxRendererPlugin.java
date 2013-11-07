@@ -19,10 +19,8 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
 
     // ------------------------------------------------------------------------------------------------------- Constants
 
-    private static final String DEFAULT_COLOR = "hsl(210,100%,90%)";    // must match client-side (see plugin.js)
-
-    private static final String PROP_COLOR = "dm4.boxrenderer.color";
-    private static final String PROP_SHAPE = "dm4.boxrenderer.shape";
+    private static final String PROP_COLOR    = "dm4.boxrenderer.color";
+    private static final String PROP_EXPANDED = "dm4.boxrenderer.expanded";
 
     // ---------------------------------------------------------------------------------------------- Instance Variables
 
@@ -56,29 +54,32 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
 
     @Override
     public void storeViewProperties(Topic topic, CompositeValueModel viewProps) {
-        String color = viewProps.getString(PROP_COLOR, null);
-        String shape = viewProps.getString(PROP_SHAPE, null);
-        _storeViewProperties(topic, color, shape);
+        DeepaMehtaTransaction tx = dms.beginTx();   // ### TODO: let the framework create the transaction
+        try {
+            storeColor(topic, viewProps);
+            storeExpanded(topic, viewProps);
+            //
+            tx.success();
+        } catch (Exception e) {
+            throw new RuntimeException("Storing view properties failed", e);
+        } finally {
+            tx.finish();
+        }
     }
 
     // ------------------------------------------------------------------------------------------------- Private Methods
 
     private void _enrichViewProperties(Topic topic, CompositeValueModel viewProps) {
-        String color, shape;
+        // 1) color
         if (topic.hasProperty(PROP_COLOR)) {
-            // fetch props from DB
-            color = (String) topic.getProperty(PROP_COLOR);
-            shape = (String) topic.getProperty(PROP_SHAPE);
-        } else {
-            // set defaults
-            color = DEFAULT_COLOR;
-            shape = "rectangle";
-            // store props in DB
-            _storeViewProperties(topic, color, shape);
+            String color = (String) topic.getProperty(PROP_COLOR);
+            viewProps.put(PROP_COLOR, color);
         }
-        // enrich view props
-        viewProps.put(PROP_COLOR, color);
-        viewProps.put(PROP_SHAPE, shape);  // not yet used at client-side. Just for illustration purpose.
+        // 2) expanded
+        if (topic.hasProperty(PROP_EXPANDED)) {
+            boolean expanded = (Boolean) topic.getProperty(PROP_EXPANDED);
+            viewProps.put(PROP_EXPANDED, expanded);
+        }
     }
 
     private void _enrichTopic(Topic topic) {
@@ -89,20 +90,18 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
 
     // ---
 
-    private void _storeViewProperties(Topic topic, String color, String shape) {
-        DeepaMehtaTransaction tx = dms.beginTx();
-        try {
-            if (color != null) {
-                topic.setProperty(PROP_COLOR, color, false);   // addToIndex = false
-            }
-            if (shape != null) {
-                topic.setProperty(PROP_SHAPE, shape, false);   // addToIndex = false
-            }
-            tx.success();
-        } catch (Exception e) {
-            throw new RuntimeException("Storing view properties failed", e);
-        } finally {
-            tx.finish();
+    private void storeColor(Topic topic, CompositeValueModel viewProps) {
+        if (viewProps.has(PROP_COLOR)) {
+            String color = viewProps.getString(PROP_COLOR);
+            topic.setProperty(PROP_COLOR, color, false);        // addToIndex = false
+        }
+    }
+
+    private void storeExpanded(Topic topic, CompositeValueModel viewProps) {
+        if (viewProps.has(PROP_EXPANDED)) {
+            boolean expanded = viewProps.getBoolean(PROP_EXPANDED);
+            topic.setProperty(PROP_EXPANDED, expanded, false);  // addToIndex = false
+            // ### TODO: store the expanded flag *per-topicmap*
         }
     }
 }

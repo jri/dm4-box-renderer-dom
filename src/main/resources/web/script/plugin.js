@@ -3,8 +3,11 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
     var DEFAULT_TOPIC_COLOR = "hsl(210,100%,90%)"   // must match server-side (see BoxRendererPlugin.java)
                                                     // must match top/left color in color dialog (see below)
 
-    var PROP_COLOR = "dm4.boxrenderer.color"
-    var PROP_SHAPE = "dm4.boxrenderer.shape"
+    var IMG_SRC_EXPANDED  = "/de.deepamehta.box-renderer-dom/images/expanded.png"
+    var IMG_SRC_COLLAPSED = "/de.deepamehta.box-renderer-dom/images/collapsed.png"
+
+    var PROP_COLOR    = "dm4.boxrenderer.color"
+    var PROP_EXPANDED = "dm4.boxrenderer.expanded"
 
     var canvas_view
 
@@ -90,13 +93,30 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
             topic_view.dom.append($("<div>").addClass("topic-label"))
             if (topic_view.type_uri == "dm4.notes.note") {
                 topic_view.dom.append($("<div>").addClass("topic-content"))
+                add_expansion_handle()
             }
             // Note: setting the content gives the topic DOM its size which is required by the framework
             // in order to position the topic
             sync_topic_content(topic_view)
-            sync_background_color(topic_view)
-            // Note: the mini icon is only created in on_update_topic() which is fired right after topic_dom().
-            // We must recreate the mini icon in on_update_topic() anyway as the icon size may change through retyping.
+            // Note: the type icon is only created in on_update_topic() which is fired right after topic_dom().
+            // We must recreate the type icon in on_update_topic() anyway as the icon size may change through retyping.
+
+            function add_expansion_handle() {
+                topic_view.dom.append($("<img>").addClass("expansion-handle")
+                    .click(function(event) {
+                        var expanded = topic_view.view_props[PROP_EXPANDED]
+                        var view_props = {}
+                        view_props[PROP_EXPANDED] = !expanded
+                        canvas_view.set_view_properties(topic_view.id, view_props)
+                    })
+                    .mouseup(function() {
+                        return false    // avoids the topic from being selected
+                    })
+                    .mousedown(function() {
+                        return false    // avoids the browser from dragging an icon copy
+                    })
+                )
+            }
         }
 
         this.topic_dom_draggable_handle = function(topic_dom, handles) {
@@ -112,11 +132,12 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
          */
         this.on_update_topic = function(topic_view, ctx) {
             sync_topic_content(topic_view)
-            sync_mini_icon(topic_view)
+            sync_type_icon(topic_view)
         }
 
         this.on_update_view_properties = function(topic_view) {
             sync_background_color(topic_view)
+            sync_view_expansion(topic_view)
         }
 
         // ---
@@ -146,35 +167,45 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
             topic_view.dom.css("background-color", topic_view.view_props[PROP_COLOR])
         }
 
-        function sync_mini_icon(topic_view) {
+        function sync_view_expansion(topic_view) {
+            var expanded = topic_view.view_props[PROP_EXPANDED]
+            var expansion_handle = $(".expansion-handle", topic_view.dom)
+            if (expanded) {
+                expansion_handle.attr("src", IMG_SRC_EXPANDED)
+            } else {
+                expansion_handle.attr("src", IMG_SRC_COLLAPSED)
+            }
+        }
+
+        function sync_type_icon(topic_view) {
             var topic_dom = topic_view.dom
-            // remove existing mini icon
-            $(".mini-icon", topic_dom).remove()
+            // remove existing type icon
+            $(".type-icon", topic_dom).remove()
             // create new one (the icon size might have changed through retyping)
-            var mini_icon = $("<img>").addClass("mini-icon")
-            topic_dom.append(mini_icon)
+            var type_icon = $("<img>").addClass("type-icon")
+            topic_dom.append(type_icon)
             set_src()
             set_size()
             set_position()
             add_mouse_handler()
 
             function set_src() {
-                mini_icon.attr("src", dm4c.get_type_icon_src(topic_view.type_uri))
+                type_icon.attr("src", dm4c.get_type_icon_src(topic_view.type_uri))
             }
 
             function set_size() {
-                mini_icon.width(mini_icon.width() / ICON_SCALE_FACTOR)  // the image height is scaled proportionally
+                type_icon.width(type_icon.width() / ICON_SCALE_FACTOR)  // the image height is scaled proportionally
             }
 
             function set_position() {
-                mini_icon.css({
-                    top:  Math.floor(topic_dom.outerHeight() - mini_icon.height() / ICON_OFFSET_FACTOR),
-                    left: Math.floor(topic_dom.outerWidth()  - mini_icon.width()  / ICON_OFFSET_FACTOR)
+                type_icon.css({
+                    top:  Math.floor(topic_dom.outerHeight() - type_icon.height() / ICON_OFFSET_FACTOR),
+                    left: Math.floor(topic_dom.outerWidth()  - type_icon.width()  / ICON_OFFSET_FACTOR)
                 })
             }
 
             function add_mouse_handler() {
-                mini_icon.mousedown(function(event) {
+                type_icon.mousedown(function(event) {
                     // ### TODO: framework must close_context_menu()
                     var pos = canvas_view.pos(event)
                     dm4c.do_select_topic(topic_view.id)
@@ -189,7 +220,6 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
 
         this.enrich_view_properties = function(topic, view_props) {
             view_props[PROP_COLOR] = DEFAULT_TOPIC_COLOR
-            view_props[PROP_SHAPE] = "rectangle"    // not used. Just for illustration purpose.
         }
     }
 })
