@@ -159,7 +159,7 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
             if (topic_view.type_uri == "dm4.notes.note") {
                 // Note: newly created topics have an empty composite
                 var text = topic_view.composite["dm4.notes.text"]
-                $(".topic-content", topic_view.dom).html(text && text.value)
+                text && $(".topic-content", topic_view.dom).html(text.value)
             }
         }
 
@@ -170,10 +170,20 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
         function sync_view_expansion(topic_view) {
             var expanded = topic_view.view_props[PROP_EXPANDED]
             var expansion_handle = $(".expansion-handle", topic_view.dom)
+            var topic_content = $(".topic-content", topic_view.dom)
+            //
+            expansion_handle.attr("src", expanded ? IMG_SRC_EXPANDED : IMG_SRC_COLLAPSED)
+            topic_content.toggleClass("collapsed", !expanded)
             if (expanded) {
-                expansion_handle.attr("src", IMG_SRC_EXPANDED)
-            } else {
-                expansion_handle.attr("src", IMG_SRC_COLLAPSED)
+                load_note()
+            }
+
+            function load_note() {
+                if (!topic_view.composite["dm4.notes.text"]) {
+                    console.log("load note", topic_view.id)
+                    var note = dm4c.fetch_topic(topic_view.id)
+                    canvas_view.update_topic(note)
+                }
             }
         }
 

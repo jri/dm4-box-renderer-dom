@@ -48,8 +48,10 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
 
     @Override
     public void enrichViewProperties(Topic topic, CompositeValueModel viewProps) {
-        _enrichViewProperties(topic, viewProps);
-        _enrichTopic(topic);
+        boolean expanded = _enrichViewProperties(topic, viewProps);
+        if (expanded) {
+            topic.loadChildTopics("dm4.notes.text");
+        }
     }
 
     @Override
@@ -69,23 +71,21 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
 
     // ------------------------------------------------------------------------------------------------- Private Methods
 
-    private void _enrichViewProperties(Topic topic, CompositeValueModel viewProps) {
+    private boolean _enrichViewProperties(Topic topic, CompositeValueModel viewProps) {
         // 1) color
         if (topic.hasProperty(PROP_COLOR)) {
             String color = (String) topic.getProperty(PROP_COLOR);
             viewProps.put(PROP_COLOR, color);
         }
         // 2) expanded
-        if (topic.hasProperty(PROP_EXPANDED)) {
-            boolean expanded = (Boolean) topic.getProperty(PROP_EXPANDED);
-            viewProps.put(PROP_EXPANDED, expanded);
-        }
-    }
-
-    private void _enrichTopic(Topic topic) {
+        boolean expanded = false;
         if (topic.getTypeUri().equals("dm4.notes.note")) {
-            topic.loadChildTopics("dm4.notes.text");
+            if (topic.hasProperty(PROP_EXPANDED)) {
+                expanded = (Boolean) topic.getProperty(PROP_EXPANDED);
+                viewProps.put(PROP_EXPANDED, expanded);
+            }
         }
+        return expanded;
     }
 
     // ---

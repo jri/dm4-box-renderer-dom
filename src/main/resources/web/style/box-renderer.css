@@ -17,14 +17,18 @@
     max-width: 360px;
 }
 
-#topicmap-panel .topic .type-icon {
-    position: absolute;
+#topicmap-panel .topic .topic-content.collapsed {
+    display: none;
 }
 
 #topicmap-panel .topic .expansion-handle {
     position: absolute;
     top: 17px;
     left: -6px;
+}
+
+#topicmap-panel .topic .type-icon {
+    position: absolute;
 }
 
 /* Color Dialog */
