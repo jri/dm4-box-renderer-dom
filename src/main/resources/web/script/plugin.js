@@ -174,13 +174,11 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
             //
             expansion_handle.attr("src", expanded ? IMG_SRC_EXPANDED : IMG_SRC_COLLAPSED)
             topic_content.toggleClass("collapsed", !expanded)
-            if (expanded) {
-                load_note()
-            }
+            load_note()
+            position_type_icon(topic_view)
 
             function load_note() {
-                if (!topic_view.composite["dm4.notes.text"]) {
-                    console.log("load note", topic_view.id)
+                if (expanded && !topic_view.composite["dm4.notes.text"]) {
                     var note = dm4c.fetch_topic(topic_view.id)
                     canvas_view.update_topic(note)
                 }
@@ -196,8 +194,8 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
             topic_dom.append(type_icon)
             set_src()
             set_size()
-            set_position()
-            add_mouse_handler()
+            position_type_icon(topic_view)
+            add_event_handler()
 
             function set_src() {
                 type_icon.attr("src", dm4c.get_type_icon_src(topic_view.type_uri))
@@ -207,14 +205,7 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
                 type_icon.width(type_icon.width() / ICON_SCALE_FACTOR)  // the image height is scaled proportionally
             }
 
-            function set_position() {
-                type_icon.css({
-                    top:  Math.floor(topic_dom.outerHeight() - type_icon.height() / ICON_OFFSET_FACTOR),
-                    left: Math.floor(topic_dom.outerWidth()  - type_icon.width()  / ICON_OFFSET_FACTOR)
-                })
-            }
-
-            function add_mouse_handler() {
+            function add_event_handler() {
                 type_icon.mousedown(function(event) {
                     // ### TODO: framework must close_context_menu()
                     var pos = canvas_view.pos(event)
@@ -223,6 +214,15 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
                     return false    // avoids the browser from dragging an icon copy
                 })
             }
+        }
+
+        function position_type_icon(topic_view) {
+            var topic_dom = topic_view.dom
+            var type_icon = $(".type-icon", topic_dom)
+            type_icon.css({
+                top:  Math.floor(topic_dom.outerHeight() - type_icon.height() / ICON_OFFSET_FACTOR),
+                left: Math.floor(topic_dom.outerWidth()  - type_icon.width()  / ICON_OFFSET_FACTOR)
+            })
         }
     }
 
