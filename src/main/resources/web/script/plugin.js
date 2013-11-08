@@ -175,7 +175,6 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
             expansion_handle.attr("src", expanded ? IMG_SRC_EXPANDED : IMG_SRC_COLLAPSED)
             topic_content.toggleClass("collapsed", !expanded)
             load_note()
-            position_type_icon(topic_view)
 
             function load_note() {
                 if (expanded && !topic_view.composite["dm4.notes.text"]) {
@@ -194,7 +193,6 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
             topic_dom.append(type_icon)
             set_src()
             set_size()
-            position_type_icon(topic_view)
             add_event_handler()
 
             function set_src() {
@@ -214,15 +212,6 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
                     return false    // avoids the browser from dragging an icon copy
                 })
             }
-        }
-
-        function position_type_icon(topic_view) {
-            var topic_dom = topic_view.dom
-            var type_icon = $(".type-icon", topic_dom)
-            type_icon.css({
-                top:  Math.floor(topic_dom.outerHeight() - type_icon.height() / ICON_OFFSET_FACTOR),
-                left: Math.floor(topic_dom.outerWidth()  - type_icon.width()  / ICON_OFFSET_FACTOR)
-            })
         }
     }
 

@@ -1,15 +1,15 @@
 /* Topic */
 
 #topicmap-panel .topic {
-    padding-top: 2px;
+    padding-top:    2px;
     padding-bottom: 2px;
-    padding-left: 4px;
+    padding-left:   4px;
     padding-right: 12px;
 }
 
 #topicmap-panel .topic .topic-label {
     max-width: 200px;
-    min-width: 18px;    /* draggable handle for empty topics */
+    min-width:  18px;   /* draggable handle for empty topics */
     min-height: 18px;   /* draggable handle for empty topics */
 }
 
@@ -23,12 +23,14 @@
 
 #topicmap-panel .topic .expansion-handle {
     position: absolute;
-    top: 17px;
+    top:  17px;
     left: -6px;
 }
 
 #topicmap-panel .topic .type-icon {
     position: absolute;
+    bottom: -5px;
+    right:  -5px;
 }
 
 /* Color Dialog */
@@ -38,9 +40,9 @@
 }
 
 #color-dialog .color-box {
-    width: 32px;
+    width:  32px;
     height: 32px;
-    margin: 3px;
+    margin:  3px;
     float: left;
 }
 
