@@ -95,9 +95,6 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
                 topic_view.dom.append($("<div>").addClass("topic-content"))
                 add_expansion_handle()
             }
-            // Note: setting the content gives the topic DOM its size which is required by the framework
-            // in order to position the topic
-            sync_topic_content(topic_view)
             // Note: the type icon is only created in on_update_topic() which is fired right after topic_dom().
             // We must recreate the type icon in on_update_topic() anyway as the icon size may change through retyping.
 
