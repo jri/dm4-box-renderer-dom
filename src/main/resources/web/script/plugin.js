@@ -1,7 +1,7 @@
 dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
 
-    var DEFAULT_TOPIC_COLOR = "hsl(210,100%,90%)"   // must match server-side (see BoxRendererPlugin.java)
-                                                    // must match top/left color in color dialog (see below)
+    var DEFAULT_TOPIC_COLOR = "hsl(210,100%,90%)"   // must match top/left color in color dialog (see below)
+    var ICON_SCALE_FACTOR = 2
 
     var IMG_SRC_EXPANDED  = "/de.deepamehta.box-renderer-dom/images/expanded.png"
     var IMG_SRC_COLLAPSED = "/de.deepamehta.box-renderer-dom/images/collapsed.png"
@@ -78,9 +78,6 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
     // ------------------------------------------------------------------------------------------------- Private Classes
 
     function BoxView(_canvas_view) {
-
-        var ICON_SCALE_FACTOR = 2
-        var ICON_OFFSET_FACTOR = 1.5
 
         // widen scope
         canvas_view = _canvas_view

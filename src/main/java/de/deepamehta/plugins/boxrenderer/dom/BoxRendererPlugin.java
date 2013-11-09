@@ -1,13 +1,11 @@
 package de.deepamehta.plugins.boxrenderer.dom;
 
-import de.deepamehta.core.osgi.PluginActivator;
-import de.deepamehta.core.storage.spi.DeepaMehtaTransaction;
-
 import de.deepamehta.plugins.topicmaps.ViewmodelCustomizer;
 import de.deepamehta.plugins.topicmaps.service.TopicmapsService;
 
 import de.deepamehta.core.Topic;
 import de.deepamehta.core.model.CompositeValueModel;
+import de.deepamehta.core.osgi.PluginActivator;
 import de.deepamehta.core.service.PluginService;
 import de.deepamehta.core.service.annotation.ConsumesService;
 
@@ -56,23 +54,14 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
 
     @Override
     public void storeViewProperties(Topic topic, CompositeValueModel viewProps) {
-        DeepaMehtaTransaction tx = dms.beginTx();   // ### TODO: let the framework create the transaction
-        try {
-            storeColor(topic, viewProps);
-            storeExpanded(topic, viewProps);
-            //
-            tx.success();
-        } catch (Exception e) {
-            throw new RuntimeException("Storing view properties failed", e);
-        } finally {
-            tx.finish();
-        }
+        storeColor(topic, viewProps);
+        storeExpanded(topic, viewProps);
     }
 
     // ------------------------------------------------------------------------------------------------- Private Methods
 
     private boolean _enrichViewProperties(Topic topic, CompositeValueModel viewProps) {
-        // 1) color
+        // 1) color     // ### TODO: set default color at client-side
         if (topic.hasProperty(PROP_COLOR)) {
             String color = (String) topic.getProperty(PROP_COLOR);
             viewProps.put(PROP_COLOR, color);
