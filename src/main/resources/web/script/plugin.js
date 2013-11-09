@@ -40,8 +40,8 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
         ]
 
         function do_open_color_dialog() {
-
-            var current_color = canvas_view.get_topic(topic.id).view_props[PROP_COLOR]
+            // Note: topics added to a topicmap while the Box Renderer is not active have no stored color
+            var current_color = canvas_view.get_topic(topic.id).view_props[PROP_COLOR] || DEFAULT_TOPIC_COLOR
             var content = $()
             add_color_row("100%", "90%")
             add_color_row( "80%", "80%")
@@ -55,12 +55,12 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
 
             function add_color_row(saturation, light) {
                 for (var i = 4; i < 12; i++) {
-                    add_color("hsl(" + [(45 * i + 30) % 360, saturation, light] + ")")
+                    add_color_box("hsl(" + [(45 * i + 30) % 360, saturation, light] + ")")
                 }
                 content = content.add($("<br>").attr("clear", "all"))
             }
 
-            function add_color(color) {
+            function add_color_box(color) {
                 var color_box = $("<div>").addClass("color-box").css("background-color", color).click(function() {
                     var view_props = {}
                     view_props[PROP_COLOR] = color
@@ -158,7 +158,8 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
         }
 
         function sync_background_color(topic_view) {
-            topic_view.dom.css("background-color", topic_view.view_props[PROP_COLOR])
+            // Note: topics added to a topicmap while the Box Renderer is not active have no stored color
+            topic_view.dom.css("background-color", topic_view.view_props[PROP_COLOR] || DEFAULT_TOPIC_COLOR)
         }
 
         function sync_view_expansion(topic_view) {
@@ -213,6 +214,7 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
 
         this.enrich_view_properties = function(topic, view_props) {
             view_props[PROP_COLOR] = DEFAULT_TOPIC_COLOR
+            view_props[PROP_EXPANDED] = false
         }
     }
 })
