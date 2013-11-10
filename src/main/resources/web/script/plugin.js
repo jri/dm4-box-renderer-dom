@@ -87,28 +87,31 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
         // === Hook Implementations ===
 
         this.topic_dom = function(topic_view) {
-            topic_view.dom.append($("<div>").addClass("topic-label"))
+            var topic_dom = topic_view.dom
+            topic_dom.append($("<div>").addClass("topic-label"))
             if (topic_view.type_uri == "dm4.notes.note") {
-                topic_view.dom.append($("<div>").addClass("topic-content"))
                 add_expansion_handle()
+                topic_dom.append($("<div>").addClass("topic-content"))
             }
             // Note: the type icon is only created in on_update_topic() which is fired right after topic_dom().
             // We must recreate the type icon in on_update_topic() anyway as the icon size may change through retyping.
 
             function add_expansion_handle() {
-                topic_view.dom.append($("<img>").addClass("expansion-handle")
-                    .click(function(event) {
-                        var expanded = topic_view.view_props[PROP_EXPANDED]
-                        var view_props = {}
-                        view_props[PROP_EXPANDED] = !expanded
-                        canvas_view.set_view_properties(topic_view.id, view_props)
-                    })
-                    .mouseup(function() {
-                        return false    // avoids the topic from being selected
-                    })
-                    .mousedown(function() {
-                        return false    // avoids the browser from dragging an icon copy
-                    })
+                topic_dom.append($("<div>").addClass("expansion-handle-container")
+                    .append($("<img>").addClass("expansion-handle")
+                        .click(function(event) {
+                            var expanded = topic_view.view_props[PROP_EXPANDED]
+                            var view_props = {}
+                            view_props[PROP_EXPANDED] = !expanded
+                            canvas_view.set_view_properties(topic_view.id, view_props)
+                        })
+                        .mouseup(function() {
+                            return false    // avoids the topic from being selected
+                        })
+                        .mousedown(function() {
+                            return false    // avoids the browser from dragging an icon copy
+                        })
+                    )
                 )
             }
         }
@@ -127,6 +130,7 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
         this.on_update_topic = function(topic_view, ctx) {
             sync_topic_content(topic_view)
             sync_type_icon(topic_view)
+            // ### FIXME: add/remove expansion handle on topic retype
         }
 
         this.on_update_view_properties = function(topic_view) {
@@ -181,11 +185,11 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
 
         function sync_type_icon(topic_view) {
             var topic_dom = topic_view.dom
-            // remove existing type icon
-            $(".type-icon", topic_dom).remove()
-            // create new one (the icon size might have changed through retyping)
+            // recreate type icon (the size might have changed through retyping)
             var type_icon = $("<img>").addClass("type-icon")
+            $(".type-icon", topic_dom).remove()
             topic_dom.append(type_icon)
+            //
             set_src()
             set_size()
             add_event_handler()
