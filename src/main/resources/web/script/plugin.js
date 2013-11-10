@@ -167,13 +167,15 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
         }
 
         function sync_view_expansion(topic_view) {
-            var expanded = topic_view.view_props[PROP_EXPANDED]
-            var expansion_handle = $(".expansion-handle", topic_view.dom)
-            var topic_content = $(".topic-content", topic_view.dom)
-            //
-            expansion_handle.attr("src", expanded ? IMG_SRC_EXPANDED : IMG_SRC_COLLAPSED)
-            topic_content.toggleClass("collapsed", !expanded)
-            load_note()
+            if (topic_view.type_uri == "dm4.notes.note") {
+                // Note: when undefined is passed as 2nd argument toggleClass() performs its 1-arg form
+                var expanded = topic_view.view_props[PROP_EXPANDED] == true
+                var expansion_handle = $(".expansion-handle", topic_view.dom)
+                //
+                expansion_handle.attr("src", expanded ? IMG_SRC_EXPANDED : IMG_SRC_COLLAPSED)
+                topic_view.dom.toggleClass("expanded", expanded)
+                load_note()
+            }
 
             function load_note() {
                 if (expanded && !topic_view.composite["dm4.notes.text"]) {

@@ -13,12 +13,18 @@
     min-height: 18px;   /* draggable handle for empty topics */
 }
 
-#topicmap-panel .topic .topic-content {
+#topicmap-panel .topic.expanded .topic-label {
+    font-weight: bold;
     max-width: 360px;
 }
 
-#topicmap-panel .topic .topic-content.collapsed {
+#topicmap-panel .topic .topic-content {
     display: none;
+    max-width: 360px;
+}
+
+#topicmap-panel .topic.expanded .topic-content {
+    display: block;
 }
 
 #topicmap-panel .topic .expansion-handle-container {
