@@ -61,7 +61,7 @@ public class BoxRendererPlugin extends PluginActivator implements ViewmodelCusto
     // ------------------------------------------------------------------------------------------------- Private Methods
 
     private boolean _enrichViewProperties(Topic topic, CompositeValueModel viewProps) {
-        // 1) color     // ### TODO: set default color at client-side
+        // 1) color
         if (topic.hasProperty(PROP_COLOR)) {
             String color = (String) topic.getProperty(PROP_COLOR);
             viewProps.put(PROP_COLOR, color);

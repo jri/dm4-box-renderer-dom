@@ -22,9 +22,14 @@
 }
 
 #topicmap-panel .topic .expansion-handle {
+    display: none;
     position: absolute;
     top:  17px;
     left: -6px;
+}
+
+#topicmap-panel .topic:hover .expansion-handle {
+    display: block;
 }
 
 #topicmap-panel .topic .type-icon {
