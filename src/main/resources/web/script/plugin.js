@@ -206,11 +206,12 @@ dm4c.add_plugin("de.deepamehta.box-renderer-dom", function() {
 
             function add_event_handler() {
                 type_icon.mousedown(function(event) {
-                    // ### TODO: framework must close_context_menu()
-                    var pos = canvas_view.pos(event)
-                    dm4c.do_select_topic(topic_view.id)
-                    dm4c.topicmap_renderer.begin_association(topic_view.id, pos.x, pos.y)
-                    return false    // avoids the browser from dragging an icon copy
+                    if (event.which == 1) {
+                        var pos = canvas_view.pos(event)
+                        dm4c.do_select_topic(topic_view.id)
+                        dm4c.topicmap_renderer.begin_association(topic_view.id, pos.x, pos.y)
+                        return false    // avoids the browser from dragging an icon copy
+                    }
                 })
             }
         }
